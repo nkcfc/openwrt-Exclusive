@@ -109,6 +109,9 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
+    - name: 查看磁盘
+      run: df -hT
+      
     - name: 开始编译固件
       id: compile
       run: |
@@ -157,7 +160,7 @@ jobs:
 
     - name: 上传固件到NN网盘
       id: cowtransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+      if: steps.organize.outputs.status == '1success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
@@ -165,7 +168,7 @@ jobs:
         echo "::set-output name=url::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
     - name: 上传固件到WT网盘
       id: wetransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
+      if: steps.organize.outputs.status == '1success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
@@ -198,8 +201,8 @@ jobs:
     - name: 清理旧的workflow
       uses: FunctionXJB/delete-workflow-runs@main
       with:
-        retain_days: 180
-        keep_minimum_runs: 10
+        retain_days: 30
+        keep_minimum_runs: 5
 
     - name: 删除旧的Releases
       uses: dev-drprasad/delete-older-releases@v0.1.0
