@@ -52,6 +52,10 @@ jobs:
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
+        sudo dd if=/dev/zero of=/bt.img  bs=1G count=0 seek=38
+        sudo mkfs.btrfs /bt.img -L bt
+        sudo  mount /bt.img -o rw,relatime,compress-force=zstd:15  /workdir  
+        sudo  df -h /workdir         
         sudo chown $USER:$GROUPS /workdir
         
     - name: 查看磁盘
